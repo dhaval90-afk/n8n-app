@@ -1,0 +1,33 @@
+# fly.toml - template for deploying n8n to Fly
+# Replace `app` with your Fly app name or set `FLY_APP_NAME` in GitHub secrets
+app = "n8n-app"
+kill_signal = "SIGINT"
+kill_timeout = 5
+
+[build]
+  image = "dockerfile"
+
+[env]
+  PORT = "5678"
+  NODE_ENV = "production"
+
+[[mounts]]
+  source = "n8n-data"
+  destination = "/home/node/.n8n"
+
+[[services]]
+  internal_port = 5678
+  protocol = "tcp"
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+  [[services.ports]]
+    handlers = ["tls","http"]
+    port = 443
+  [[services.tcp_checks]]
+    grace_period = "5s"
+    interval = "15s"
+    timeout = "2s"
